@@ -8,9 +8,14 @@ import { getStore } from '@netlify/blobs';
 
 export default async (req, context) => {
   try {
-    const resumen = getStore('resumen-negocios');
+    const resumen = getStore({ name: 'resumen-negocios', consistency: 'strong' });
     const url = new URL(req.url);
     const codigo = url.searchParams.get('codigo');
+
+    const headersRespuesta = {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store, no-cache, must-revalidate'
+    };
 
     if (codigo) {
       // Resumen de un solo negocio
@@ -18,12 +23,12 @@ export default async (req, context) => {
       if (!datos) {
         return new Response(JSON.stringify({ codigo_negocio: codigo, total_activos: 0, meta: 10, linea_gratis_ganada: false }), {
           status: 200,
-          headers: { 'Content-Type': 'application/json' }
+          headers: headersRespuesta
         });
       }
       return new Response(JSON.stringify(datos), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: headersRespuesta
       });
     }
 
@@ -35,7 +40,7 @@ export default async (req, context) => {
 
     return new Response(JSON.stringify(resultados), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: headersRespuesta
     });
 
   } catch (error) {
