@@ -78,10 +78,17 @@ export default async (req, context) => {
       const datosNegocio = await resumen.get(codigoRef, { type: 'json' });
       if (datosNegocio) {
         const nuevoTotal = Math.max(0, datosNegocio.total_activos - 1);
+        // Si cae por debajo de la meta de nivel 2, se resetea la fecha en que la alcanzó
+        // (debe sostenerse sin interrupción para calificar al celular gratis)
+        const fechaNivel2 = nuevoTotal >= (datosNegocio.meta_nivel2 || 20)
+          ? datosNegocio.fecha_alcanzo_nivel2
+          : null;
+
         await resumen.setJSON(codigoRef, {
           ...datosNegocio,
           total_activos: nuevoTotal,
-          linea_gratis_ganada: nuevoTotal >= (datosNegocio.meta || 10)
+          linea_gratis_ganada: nuevoTotal >= (datosNegocio.meta || 10),
+          fecha_alcanzo_nivel2: fechaNivel2
         });
       }
     }
