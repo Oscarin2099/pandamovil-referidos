@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PandaMóvil — Generar mi QR de Punto Panda</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --panda-black: #1a1a1a;
+    --panda-white: #ffffff;
+    --panda-accent: #e63946;
+    --panda-gray: #f2f2f2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--panda-gray);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: var(--panda-white);
+    border-radius: 20px;
+    padding: 32px 24px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  h1 {
+    font-size: 22px;
+    color: var(--panda-black);
+    margin-bottom: 6px;
+  }
+  p.subtitle {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  label {
+    display: block;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--panda-black);
+    margin-bottom: 6px;
+  }
+  input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #ddd;
+    border-radius: 10px;
+    font-size: 15px;
+    margin-bottom: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: var(--panda-accent); }
+  button {
+    width: 100%;
+    padding: 14px;
+    background: var(--panda-accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  button:hover { opacity: 0.9; }
+  #resultado {
+    margin-top: 28px;
+    display: none;
+  }
+  #qrcode {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0;
+    padding: 16px;
+    background: var(--panda-white);
+    border: 1.5px solid #eee;
+    border-radius: 14px;
+  }
+  .codigo-box {
+    background: var(--panda-gray);
+    border-radius: 10px;
+    padding: 12px;
+    font-family: monospace;
+    font-size: 14px;
+    word-break: break-all;
+    margin-bottom: 12px;
+  }
+  .link-box {
+    background: var(--panda-gray);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 12px;
+    word-break: break-all;
+    color: #444;
+    margin-bottom: 16px;
+  }
+  .btn-secondary {
+    background: var(--panda-black);
+    margin-top: 8px;
+  }
+  .nota {
+    font-size: 12px;
+    color: #999;
+    margin-top: 20px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🐼 Punto Panda</h1>
+  <p class="subtitle">Genera el QR único de tu negocio para empezar a acumular referidos.</p>
+
+  <form id="form-negocio">
+    <label for="nombre-negocio">Nombre del negocio</label>
+    <input type="text" id="nombre-negocio" placeholder="Ej. Abarrotes Don Beto" required>
+
+    <label for="telefono-negocio">Teléfono de contacto</label>
+    <input type="tel" id="telefono-negocio" placeholder="Ej. 5512345678" required pattern="[0-9]{10}">
+
+    <button type="submit">Generar mi código QR</button>
+  </form>
+
+  <div id="resultado">
+    <p style="font-weight:600; margin-bottom:8px;">Tu código de negocio:</p>
+    <div class="codigo-box" id="codigo-texto"></div>
+
+    <div id="qrcode"></div>
+
+    <p style="font-weight:600; margin: 12px 0 4px;">Link de activación:</p>
+    <div class="link-box" id="link-texto"></div>
+
+    <button class="btn-secondary" id="btn-descargar">Descargar QR (imagen)</button>
+  </div>
+
+  <p class="nota">
+    Este código identifica tu negocio. Cada persona que se active desde este QR
+    quedará registrada como tu referido. Al llegar a 10 activos, tu línea PandaMóvil
+    es gratis de por vida.
+  </p>
+</div>
+
+<script>
+  // ⚙️ CONFIGURACIÓN: cambia esto por tu dominio real de Netlify una vez publicado
+  // Ej. "https://pandamovil-referidos.netlify.app/activar.html"
+  const URL_BASE_ACTIVACION = "https://TU-SITIO.netlify.app/activar.html";
+
+  const form = document.getElementById('form-negocio');
+  const resultado = document.getElementById('resultado');
+  const codigoTexto = document.getElementById('codigo-texto');
+  const linkTexto = document.getElementById('link-texto');
+  let qrInstance = null;
+
+  function generarCodigo(nombre, telefono) {
+    // Código legible: primeras letras del negocio + últimos 4 dígitos del teléfono
+    const iniciales = nombre
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9\s]/g, '')
+      .split(/\s+/)
+      .map(w => w.substring(0, 3))
+      .join('')
+      .substring(0, 10);
+    const ultimosDigitos = telefono.slice(-4);
+    return `${iniciales}-${ultimosDigitos}`;
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const nombre = document.getElementById('nombre-negocio').value;
+    const telefono = document.getElementById('telefono-negocio').value;
+    const codigo = generarCodigo(nombre, telefono);
+    const linkCompleto = `${URL_BASE_ACTIVACION}?ref=${encodeURIComponent(codigo)}`;
+
+    codigoTexto.textContent = codigo;
+    linkTexto.textContent = linkCompleto;
+
+    // Generar QR
+    document.getElementById('qrcode').innerHTML = '';
+    qrInstance = new QRCode(document.getElementById('qrcode'), {
+      text: linkCompleto,
+      width: 200,
+      height: 200,
+      colorDark: "#1a1a1a",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    resultado.style.display = 'block';
+    resultado.scrollIntoView({ behavior: 'smooth' });
+
+    // Guardar registro del negocio (opcional: enviar a tu backend aquí también)
+    // fetch('TU_ENDPOINT_DE_REGISTRO', { method: 'POST', body: JSON.stringify({ nombre, telefono, codigo }) });
+  });
+
+  document.getElementById('btn-descargar').addEventListener('click', function () {
+    const canvas = document.querySelector('#qrcode canvas');
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = `QR-PuntoPanda-${codigoTexto.textContent}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+</script>
+
+</body>
+</html>

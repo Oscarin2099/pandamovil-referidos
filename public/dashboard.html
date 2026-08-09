@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PandaMóvil — Dashboard de Referidos</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f2f2f2;
+    padding: 20px;
+  }
+  h1 { font-size: 22px; margin-bottom: 4px; color: #1a1a1a; }
+  p.subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+  .buscador {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    max-width: 500px;
+  }
+  input {
+    flex: 1;
+    padding: 12px 14px;
+    border: 1.5px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  button {
+    padding: 12px 20px;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+    max-width: 900px;
+  }
+  .tarjeta {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+  .tarjeta .codigo { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+  .barra-fondo {
+    background: #eee;
+    border-radius: 8px;
+    height: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .barra-relleno {
+    background: #e63946;
+    height: 100%;
+    transition: width 0.3s;
+  }
+  .barra-relleno.completo { background: #2a9d5c; }
+  .conteo { font-size: 13px; color: #555; }
+  .ganada {
+    display: inline-block;
+    background: #eafaf0;
+    color: #2a9d5c;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-top: 6px;
+  }
+  .vacio { color: #999; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<h1>📊 Dashboard de Referidos</h1>
+<p class="subtitle">Consulta el avance de cada negocio Punto Panda.</p>
+
+<div class="buscador">
+  <input type="text" id="filtro" placeholder="Buscar código de negocio...">
+  <button onclick="cargarDatos()">Actualizar</button>
+</div>
+
+<div class="grid" id="grid">
+  <p class="vacio">Cargando...</p>
+</div>
+
+<script>
+  async function cargarDatos() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '<p class="vacio">Cargando...</p>';
+
+    try {
+      const res = await fetch('/api/resumen');
+      const datos = await res.json();
+
+      if (!datos || datos.length === 0) {
+        grid.innerHTML = '<p class="vacio">Aún no hay referidos registrados.</p>';
+        return;
+      }
+
+      const filtro = document.getElementById('filtro').value.toUpperCase();
+      const filtrados = datos.filter(d => d.codigo_negocio.toUpperCase().includes(filtro));
+
+      grid.innerHTML = filtrados.map(d => {
+        const porcentaje = Math.min(100, (d.total_activos / d.meta) * 100);
+        return `
+          <div class="tarjeta">
+            <div class="codigo">${d.codigo_negocio}</div>
+            <div class="barra-fondo">
+              <div class="barra-relleno ${d.linea_gratis_ganada ? 'completo' : ''}" style="width:${porcentaje}%"></div>
+            </div>
+            <div class="conteo">${d.total_activos} / ${d.meta} referidos activos</div>
+            ${d.linea_gratis_ganada ? '<div class="ganada">✓ Línea gratis ganada</div>' : ''}
+          </div>
+        `;
+      }).join('');
+
+    } catch (error) {
+      grid.innerHTML = '<p class="vacio">Error al cargar los datos.</p>';
+      console.error(error);
+    }
+  }
+
+  document.getElementById('filtro').addEventListener('input', cargarDatos);
+  cargarDatos();
+</script>
+
+</body>
+</html>
