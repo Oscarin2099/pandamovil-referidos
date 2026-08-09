@@ -18,7 +18,7 @@ function noAutorizado() {
 }
 
 export default async (req, context) => {
-  const claveEsperada = Netlify.env.get('ADMIN_KEY') || 'panda2026!';
+  const claveEsperada = Netlify.env.get('ADMIN_KEY') || 'panda2026';
   const claveRecibida = req.headers.get('x-admin-key');
 
   if (claveRecibida !== claveEsperada) {
