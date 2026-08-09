@@ -18,15 +18,15 @@ function noAutorizado() {
 }
 
 export default async (req, context) => {
-  const claveEsperada = Netlify.env.get('ADMIN_KEY') || 'panda2026';
+  const claveEsperada = Netlify.env.get('ADMIN_KEY') || 'panda2026!';
   const claveRecibida = req.headers.get('x-admin-key');
 
   if (claveRecibida !== claveEsperada) {
     return noAutorizado();
   }
 
-  const activaciones = getStore('activaciones');
-  const resumen = getStore('resumen-negocios');
+  const activaciones = getStore({ name: 'activaciones', consistency: 'strong' });
+  const resumen = getStore({ name: 'resumen-negocios', consistency: 'strong' });
 
   if (req.method === 'GET') {
     // Listar todas las activaciones, más recientes primero
@@ -38,7 +38,7 @@ export default async (req, context) => {
 
     return new Response(JSON.stringify(registros), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store, no-cache, must-revalidate' }
     });
   }
 
