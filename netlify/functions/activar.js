@@ -7,7 +7,9 @@
 
 import { getStore } from '@netlify/blobs';
 
-const META_REFERIDOS = 10; // referidos activos necesarios para línea gratis
+const META_REFERIDOS = 10; // referidos activos necesarios para línea gratis (nivel 1)
+const META_NIVEL2 = 20; // referidos activos necesarios para celular gratis (nivel 2)
+const MESES_SOSTENIDOS_NIVEL2 = 6; // debe sostenerse este tiempo para calificar
 
 export default async (req, context) => {
   if (req.method !== 'POST') {
@@ -54,11 +56,20 @@ export default async (req, context) => {
       const nuevoTotal = totalPrevio + 1;
       lineaGanada = nuevoTotal >= META_REFERIDOS;
 
+      // La fecha en que alcanzó 20 solo se marca la primera vez que llega ahí
+      let fechaAlcanzoNivel2 = actual ? actual.fecha_alcanzo_nivel2 : null;
+      if (nuevoTotal >= META_NIVEL2 && !fechaAlcanzoNivel2) {
+        fechaAlcanzoNivel2 = registro.fecha;
+      }
+
       await resumen.setJSON(codigoRef, {
         codigo_negocio: codigoRef,
         total_activos: nuevoTotal,
         meta: META_REFERIDOS,
         linea_gratis_ganada: lineaGanada,
+        meta_nivel2: META_NIVEL2,
+        fecha_alcanzo_nivel2: fechaAlcanzoNivel2,
+        meses_sostenidos_requeridos: MESES_SOSTENIDOS_NIVEL2,
         ultima_activacion: registro.fecha
       });
     }
