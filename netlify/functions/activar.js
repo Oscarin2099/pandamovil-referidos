@@ -29,8 +29,8 @@ export default async (req, context) => {
       });
     }
 
-    const activaciones = getStore('activaciones');
-    const resumen = getStore('resumen-negocios');
+    const activaciones = getStore({ name: 'activaciones', consistency: 'strong' });
+    const resumen = getStore({ name: 'resumen-negocios', consistency: 'strong' });
 
     const idActivacion = `act_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
     const codigoRef = datos.referido_de || 'directo';
