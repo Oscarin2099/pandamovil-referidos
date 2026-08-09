@@ -11,3 +11,21 @@
   from = "/api/resumen"
   to = "/.netlify/functions/resumen"
   status = 200
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/activar"
+  to = "/.netlify/functions/activar"
+  status = 200
+
+[[redirects]]
+  from = "/api/resumen"
+  to = "/.netlify/functions/resumen"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin"
+  to = "/.netlify/functions/admin"
+  status = 200
