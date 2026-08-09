@@ -2,6 +2,7 @@
   "name": "pandamovil-referidos",
   "version": "1.0.0",
   "description": "Sistema de referidos PandaMóvil para negocios (Punto Panda)",
+  "type": "module",
   "dependencies": {
     "@netlify/blobs": "^8.1.0"
   }
