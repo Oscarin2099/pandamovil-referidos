@@ -4,206 +4,448 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PandaMóvil — Mi Progreso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --panda-black: #1a1a1a;
-    --panda-white: #ffffff;
-    --panda-accent: #e63946;
-    --panda-gray: #f2f2f2;
-    --panda-green: #2a9d5c;
-    --panda-gold: #d4a017;
+    --ink: #17181c;
+    --paper: #faf9f7;
+    --paper-dim: #f0efeb;
+    --panda-red: #e63946;
+    --panda-red-dim: #fbe3e5;
+    --gold: #f2a93b;
+    --gold-dim: #fdf1dc;
+    --jade: #2e9e5b;
+    --jade-dim: #e5f6ec;
+    --mist: #e4e2dc;
+    --ink-soft: #6b6a66;
   }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--panda-gray);
+    font-family: 'Manrope', sans-serif;
+    background: var(--paper);
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(230,57,70,0.05) 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(242,169,59,0.06) 0%, transparent 45%);
+    color: var(--ink);
     min-height: 100vh;
     display: flex;
-    align-items: flex-start;
     justify-content: center;
-    padding: 20px;
+    padding: 32px 18px 60px;
   }
-  .card {
-    background: var(--panda-white);
-    border-radius: 20px;
-    padding: 32px 24px;
-    max-width: 440px;
-    width: 100%;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-    margin-top: 20px;
-  }
-  h1 { font-size: 22px; color: var(--panda-black); text-align: center; margin-bottom: 4px; }
-  p.subtitle { color: #666; font-size: 14px; text-align: center; margin-bottom: 24px; }
 
-  .buscador { display: flex; gap: 8px; margin-bottom: 8px; }
-  input {
-    flex: 1;
-    padding: 12px 14px;
-    border: 1.5px solid #ddd;
-    border-radius: 10px;
-    font-size: 15px;
-    outline: none;
+  .wrap { width: 100%; max-width: 460px; }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
   }
-  input:focus { border-color: var(--panda-accent); }
-  button {
-    padding: 12px 20px;
-    background: var(--panda-accent);
-    color: white;
+  .eyebrow .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--panda-red);
+  }
+
+  h1 {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    text-align: center;
+    letter-spacing: -0.01em;
+  }
+  p.subtitle {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 14.5px;
+    margin: 8px 0 28px;
+    line-height: 1.5;
+  }
+
+  .buscador {
+    display: flex;
+    gap: 8px;
+    background: white;
+    border: 1.5px solid var(--mist);
+    border-radius: 14px;
+    padding: 6px;
+    box-shadow: 0 2px 14px rgba(23,24,28,0.05);
+  }
+  .buscador input {
+    flex: 1;
     border: none;
-    border-radius: 10px;
+    outline: none;
+    padding: 11px 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    text-transform: uppercase;
+    background: transparent;
+    letter-spacing: 0.03em;
+  }
+  .buscador input::placeholder { color: #b8b6b0; text-transform: none; letter-spacing: normal; }
+  .buscador button {
+    border: none;
+    background: var(--ink);
+    color: white;
+    font-family: 'Manrope', sans-serif;
     font-weight: 700;
+    font-size: 13.5px;
+    padding: 0 20px;
+    border-radius: 9px;
     cursor: pointer;
+    transition: background 0.15s;
   }
-  .ayuda-codigo { font-size: 12px; color: #999; margin-bottom: 20px; }
+  .buscador button:hover { background: var(--panda-red); }
 
-  #resultado { display: none; margin-top: 24px; }
+  /* ---- Gauge card ---- */
+  .gauge-card {
+    background: white;
+    border: 1.5px solid var(--mist);
+    border-radius: 22px;
+    margin-top: 22px;
+    padding: 26px 22px 22px;
+    box-shadow: 0 4px 24px rgba(23,24,28,0.06);
+    display: none;
+  }
 
-  .nivel {
-    border: 1.5px solid #eee;
+  .gauge-holder { position: relative; width: 100%; max-width: 340px; margin: 0 auto; }
+  .gauge-holder svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+  .needle-group {
+    transform-origin: 170px 168px;
+    transition: transform 1.1s cubic-bezier(0.34, 1.2, 0.4, 1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .needle-group { transition: none; }
+  }
+
+  .readout {
+    text-align: center;
+    margin-top: -18px;
+  }
+  .readout .numero {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 46px;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .readout .de-cuanto {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+  .readout .codigo-tag {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    background: var(--paper-dim);
+    padding: 4px 10px;
+    border-radius: 7px;
+    letter-spacing: 0.03em;
+  }
+
+  /* ---- Nivel cards ---- */
+  .niveles { margin-top: 22px; display: flex; flex-direction: column; gap: 12px; }
+  .nivel-card {
+    border: 1.5px solid var(--mist);
     border-radius: 16px;
-    padding: 18px;
-    margin-bottom: 16px;
+    padding: 15px 16px;
+    background: white;
   }
-  .nivel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .nivel-titulo { font-weight: 700; font-size: 15px; color: var(--panda-black); }
-  .nivel-premio { font-size: 12px; color: #666; }
-
-  .barra-fondo { background: #eee; border-radius: 8px; height: 14px; overflow: hidden; margin-bottom: 8px; }
-  .barra-relleno { height: 100%; transition: width 0.4s; background: var(--panda-accent); }
-  .barra-relleno.completo { background: var(--panda-green); }
-
-  .conteo-texto { font-size: 13px; color: #555; text-align: right; }
-
-  .badge-ganado {
-    display: inline-block;
-    background: #eafaf0;
-    color: var(--panda-green);
-    font-size: 12px;
+  .nivel-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .nivel-nombre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Manrope', sans-serif;
     font-weight: 700;
-    padding: 5px 10px;
-    border-radius: 8px;
-    margin-top: 8px;
+    font-size: 14px;
   }
-  .badge-en-espera {
-    display: inline-block;
-    background: #fff8e6;
-    color: var(--panda-gold);
-    font-size: 12px;
-    font-weight: 700;
-    padding: 5px 10px;
+  .nivel-icono {
+    width: 26px; height: 26px;
     border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .nivel-icono.n1 { background: var(--panda-red-dim); }
+  .nivel-icono.n2 { background: var(--gold-dim); }
+
+  .nivel-premio { font-size: 12px; color: var(--ink-soft); font-family: 'Manrope', sans-serif; }
+
+  .mini-barra {
+    height: 8px;
+    background: var(--paper-dim);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .mini-barra > div {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.9s ease;
+  }
+  .mini-barra.n1 > div { background: var(--panda-red); }
+  .mini-barra.n2 > div { background: var(--gold); }
+
+  .estado-linea {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-top: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--ink-soft);
   }
 
-  .no-encontrado { text-align: center; color: #999; font-size: 14px; padding: 20px; display: none; }
+  .chip {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 100px;
+  }
+  .chip.ganado { background: var(--jade-dim); color: var(--jade); }
+  .chip.espera { background: var(--gold-dim); color: #a06a10; }
+  .chip.pendiente { background: var(--paper-dim); color: var(--ink-soft); }
+
+  .estado-vacio {
+    display: none;
+    text-align: center;
+    padding: 36px 20px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .estado-vacio .icono-vacio { font-size: 30px; margin-bottom: 10px; }
+
+  footer {
+    text-align: center;
+    margin-top: 30px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: #c2c0ba;
+    letter-spacing: 0.05em;
+  }
 </style>
 </head>
 <body>
 
-<div class="card">
-  <h1>🐼 Mi Progreso</h1>
-  <p class="subtitle">Ingresa tu código de negocio para ver cuántos referidos llevas.</p>
+<div class="wrap">
+  <div class="eyebrow"><span class="dot"></span> PUNTO PANDA · REFERIDOS</div>
+  <h1>Mi Progreso</h1>
+  <p class="subtitle">Ingresa el código de tu negocio para ver cuántos referidos activos llevas.</p>
 
   <div class="buscador">
-    <input type="text" id="codigo-input" placeholder="Ej. ABABO-1234">
-    <button onclick="consultarProgreso()">Ver</button>
+    <input type="text" id="codigo-input" placeholder="Ej. OSK-6115">
+    <button onclick="consultarProgreso()">Ver medidor</button>
   </div>
-  <p class="ayuda-codigo">Es el mismo código que aparece cuando generaste tu QR.</p>
 
-  <div id="resultado">
-    <div class="nivel">
-      <div class="nivel-header">
-        <span class="nivel-titulo">🎁 Nivel 1</span>
-        <span class="nivel-premio">LÍNEA GRATIS DE POR VIDA</span>
-      </div>
-      <div class="barra-fondo"><div class="barra-relleno" id="barra-nivel1"></div></div>
-      <div class="conteo-texto" id="texto-nivel1"></div>
-      <div id="estado-nivel1"></div>
+  <div class="gauge-card" id="gauge-card">
+    <div class="gauge-holder">
+      <svg viewBox="0 0 340 200">
+        <path id="arco-n1" fill="none" stroke="var(--panda-red)" stroke-width="18" stroke-linecap="round" />
+        <path id="arco-n2" fill="none" stroke="var(--gold)" stroke-width="18" stroke-linecap="round" opacity="0.9" />
+
+        <g id="marcas" stroke="#ffffff" stroke-width="2.5"></g>
+
+        <text id="icono-meta1" font-size="16" text-anchor="middle">🎁</text>
+        <text id="icono-meta2" font-size="16" text-anchor="middle">📱</text>
+
+        <g id="etiquetas" font-family="IBM Plex Mono, monospace" font-size="10" fill="#9b9992" text-anchor="middle"></g>
+
+        <g class="needle-group" id="aguja">
+          <polygon points="170,72 165,168 175,168" fill="var(--ink)" />
+          <circle cx="170" cy="168" r="10" fill="var(--ink)" />
+          <circle cx="170" cy="168" r="4" fill="var(--paper)" />
+        </g>
+      </svg>
     </div>
 
-    <div class="nivel">
-      <div class="nivel-header">
-        <span class="nivel-titulo">📱 Nivel 2</span>
-        <span class="nivel-premio">CELULAR NUEVO GRATIS</span>
+    <div class="readout">
+      <div class="numero" id="numero-total">0</div>
+      <div class="de-cuanto" id="texto-de-cuanto">referidos activos</div>
+      <div class="codigo-tag" id="codigo-mostrado"></div>
+    </div>
+
+    <div class="niveles">
+      <div class="nivel-card">
+        <div class="nivel-top">
+          <div class="nivel-nombre"><span class="nivel-icono n1">🎁</span> Nivel 1</div>
+          <div class="nivel-premio">Línea gratis de por vida</div>
+        </div>
+        <div class="mini-barra n1"><div id="barra-n1" style="width:0%"></div></div>
+        <div class="estado-linea">
+          <span id="texto-n1">0 / 10</span>
+          <span class="chip pendiente" id="chip-n1">En progreso</span>
+        </div>
       </div>
-      <div class="barra-fondo"><div class="barra-relleno" id="barra-nivel2"></div></div>
-      <div class="conteo-texto" id="texto-nivel2"></div>
-      <div id="estado-nivel2"></div>
+
+      <div class="nivel-card">
+        <div class="nivel-top">
+          <div class="nivel-nombre"><span class="nivel-icono n2">📱</span> Nivel 2</div>
+          <div class="nivel-premio">Celular gratis ($1,300)</div>
+        </div>
+        <div class="mini-barra n2"><div id="barra-n2" style="width:0%"></div></div>
+        <div class="estado-linea">
+          <span id="texto-n2">0 / 20</span>
+          <span class="chip pendiente" id="chip-n2">En progreso</span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="no-encontrado" id="no-encontrado">
-    No encontramos ese código, o aún no tiene referidos registrados. Verifica que esté bien escrito.
+  <div class="estado-vacio" id="estado-vacio">
+    <div class="icono-vacio">🔍</div>
+    No encontramos ese código, o aún no tiene referidos registrados.<br>Verifica que esté bien escrito.
   </div>
+
+  <footer>PANDAMÓVIL · SISTEMA DE REFERIDOS</footer>
 </div>
 
 <script>
+  const CX = 170, CY = 168, R = 130;
+  const META1 = 10, META2 = 20;
+
+  function polar(cx, cy, r, angleDeg) {
+    const rad = (angleDeg * Math.PI) / 180;
+    return { x: cx + r * Math.cos(rad), y: cy - r * Math.sin(rad) };
+  }
+
+  function describeArc(cx, cy, r, theta1, theta2) {
+    const p1 = polar(cx, cy, r, theta1);
+    const p2 = polar(cx, cy, r, theta2);
+    return `M ${p1.x} ${p1.y} A ${r} ${r} 0 0 1 ${p2.x} ${p2.y}`;
+  }
+
+  function dibujarGauge() {
+    document.getElementById('arco-n1').setAttribute('d', describeArc(CX, CY, R, 180, 90));
+    document.getElementById('arco-n2').setAttribute('d', describeArc(CX, CY, R, 90, 0));
+
+    const marcas = document.getElementById('marcas');
+    const etiquetas = document.getElementById('etiquetas');
+    let marcasHtml = '';
+    let etiquetasHtml = '';
+    for (let v = 0; v <= 20; v += 5) {
+      const theta = 180 - (v / 20) * 180;
+      const p1 = polar(CX, CY, R - 9, theta);
+      const p2 = polar(CX, CY, R + 9, theta);
+      marcasHtml += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" />`;
+      const pLabel = polar(CX, CY, R + 22, theta);
+      etiquetasHtml += `<text x="${pLabel.x}" y="${pLabel.y + 3}">${v}</text>`;
+    }
+    marcas.innerHTML = marcasHtml;
+    etiquetas.innerHTML = etiquetasHtml;
+
+    const pMeta1 = polar(CX, CY, R - 30, 90);
+    document.getElementById('icono-meta1').setAttribute('x', pMeta1.x);
+    document.getElementById('icono-meta1').setAttribute('y', pMeta1.y + 5);
+
+    const pMeta2 = polar(CX, CY, R - 30, 5);
+    document.getElementById('icono-meta2').setAttribute('x', pMeta2.x);
+    document.getElementById('icono-meta2').setAttribute('y', pMeta2.y + 5);
+  }
+
+  function moverAguja(valor) {
+    const pct = Math.min(1, valor / 20);
+    const deg = -90 + pct * 180;
+    document.getElementById('aguja').style.transform = `rotate(${deg}deg)`;
+  }
+
   async function consultarProgreso() {
     const codigo = document.getElementById('codigo-input').value.trim().toUpperCase();
     if (!codigo) return;
 
-    const resultado = document.getElementById('resultado');
-    const noEncontrado = document.getElementById('no-encontrado');
-    resultado.style.display = 'none';
-    noEncontrado.style.display = 'none';
+    const gaugeCard = document.getElementById('gauge-card');
+    const vacio = document.getElementById('estado-vacio');
+    vacio.style.display = 'none';
 
     try {
       const res = await fetch(`/api/resumen?codigo=${encodeURIComponent(codigo)}`);
       const datos = await res.json();
 
       if (!datos || datos.total_activos === 0) {
-        noEncontrado.style.display = 'block';
+        gaugeCard.style.display = 'none';
+        vacio.style.display = 'block';
         return;
       }
 
-      // Nivel 1
-      const meta1 = datos.meta || 10;
-      const pct1 = Math.min(100, (datos.total_activos / meta1) * 100);
-      document.getElementById('barra-nivel1').style.width = pct1 + '%';
-      document.getElementById('barra-nivel1').classList.toggle('completo', datos.linea_gratis_ganada);
-      document.getElementById('texto-nivel1').textContent = `${datos.total_activos} / ${meta1} referidos activos`;
-      document.getElementById('estado-nivel1').innerHTML = datos.linea_gratis_ganada
-        ? '<span class="badge-ganado">✓ Ganado</span>'
-        : '';
+      gaugeCard.style.display = 'block';
 
-      // Nivel 2 (requiere sostenerse 6 meses)
-      const meta2 = datos.meta_nivel2 || 20;
-      const mesesRequeridos = datos.meses_sostenidos_requeridos || 6;
-      const pct2 = Math.min(100, (datos.total_activos / meta2) * 100);
-      document.getElementById('barra-nivel2').style.width = pct2 + '%';
+      const total = datos.total_activos;
+      const meta1 = datos.meta || META1;
+      const meta2 = datos.meta_nivel2 || META2;
+      const mesesReq = datos.meses_sostenidos_requeridos || 6;
 
-      let estadoNivel2Html = '';
-      if (datos.total_activos >= meta2 && datos.fecha_alcanzo_nivel2) {
+      document.getElementById('numero-total').textContent = total;
+      document.getElementById('codigo-mostrado').textContent = codigo;
+
+      requestAnimationFrame(() => setTimeout(() => moverAguja(total), 80));
+
+      const pct1 = Math.min(100, (total / meta1) * 100);
+      document.getElementById('barra-n1').style.width = pct1 + '%';
+      document.getElementById('texto-n1').textContent = `${total} / ${meta1}`;
+      const chip1 = document.getElementById('chip-n1');
+      if (datos.linea_gratis_ganada) {
+        chip1.textContent = '✓ Ganado';
+        chip1.className = 'chip ganado';
+      } else {
+        chip1.textContent = 'En progreso';
+        chip1.className = 'chip pendiente';
+      }
+
+      const pct2 = Math.min(100, (total / meta2) * 100);
+      document.getElementById('barra-n2').style.width = pct2 + '%';
+      document.getElementById('texto-n2').textContent = `${total} / ${meta2}`;
+      const chip2 = document.getElementById('chip-n2');
+
+      if (total >= meta2 && datos.fecha_alcanzo_nivel2) {
         const fechaInicio = new Date(datos.fecha_alcanzo_nivel2);
         const mesesTranscurridos = (Date.now() - fechaInicio) / (1000 * 60 * 60 * 24 * 30.44);
-        const yaCalifica = mesesTranscurridos >= mesesRequeridos;
-
-        document.getElementById('barra-nivel2').classList.toggle('completo', yaCalifica);
-
-        if (yaCalifica) {
-          estadoNivel2Html = '<span class="badge-ganado">✓ Ganado</span>';
+        if (mesesTranscurridos >= mesesReq) {
+          chip2.textContent = '✓ Ganado';
+          chip2.className = 'chip ganado';
         } else {
-          const mesesFaltantes = Math.ceil(mesesRequeridos - mesesTranscurridos);
-          estadoNivel2Html = `<span class="badge-en-espera">Sosteniendo — faltan ~${mesesFaltantes} mes(es)</span>`;
+          const faltan = Math.ceil(mesesReq - mesesTranscurridos);
+          chip2.textContent = `Sosteniendo · faltan ~${faltan} mes(es)`;
+          chip2.className = 'chip espera';
         }
+      } else {
+        chip2.textContent = 'En progreso';
+        chip2.className = 'chip pendiente';
       }
-      document.getElementById('texto-nivel2').textContent = `${datos.total_activos} / ${meta2} referidos activos`;
-      document.getElementById('estado-nivel2').innerHTML = estadoNivel2Html;
-
-      resultado.style.display = 'block';
 
     } catch (error) {
-      noEncontrado.style.display = 'block';
+      gaugeCard.style.display = 'none';
+      vacio.style.display = 'block';
       console.error(error);
     }
   }
+
+  dibujarGauge();
+  moverAguja(0);
 
   document.getElementById('codigo-input').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') consultarProgreso();
   });
 
-  // Si llega con ?codigo=XXX en la URL, consulta automático
   const params = new URLSearchParams(window.location.search);
   const codigoUrl = params.get('codigo');
   if (codigoUrl) {
